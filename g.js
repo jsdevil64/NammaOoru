@@ -1,5 +1,5 @@
 // TOP-LA INTHA LINE-A ADD PANNUNGA (Unga Web App URL-a inga podunga)
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxioRO9KxmmhNcxxTGhBdJj1_Jgut5YHmKqOUMWw_FC2Og10jkN3cLRncYiqhCiibe1/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwMmTweux2sZChYAGtTglWXtcgs4EQEXTuQfz9vlZVkTjY0vVFG8TS-503rBcAIcCbG/exec';
 
 const expertGrid = document.getElementById('experts-grid');
 const openFormBtn = document.getElementById('open-form-btn');
@@ -337,3 +337,22 @@ expertForm.addEventListener('submit', (e) => {
 
 // Direct-aa live data-va Sheet-la irunthu edukka intha function-ah call pannurom
 loadExpertsFromSheet();
+
+async function loadExpertsFromSheet() {
+    expertGrid.innerHTML = '<div style="text-align:center; padding:40px; grid-column: 1/-1;"><p>விபரங்கள் லோடு ஆகிறது...</p></div>';
+    try {
+        // Redirects-ah handle panna {redirect: "follow"} add pannirukken
+        const response = await fetch(SCRIPT_URL, { method: "GET", redirect: "follow" });
+        experts = await response.json();
+        
+        if (experts.error) {
+            console.error("Apps Script Error:", experts.error);
+            expertGrid.innerHTML = '<div style="text-align:center; padding:40px; grid-column: 1/-1; color:red;"><p>Apps Script-la error ullathu!</p></div>';
+        } else {
+            handleSearch();
+        }
+    } catch (error) {
+        console.error("Error fetching data:", error);
+        expertGrid.innerHTML = '<div style="text-align:center; padding:40px; grid-column: 1/-1; color:red;"><p>டேطاء லோடு செய்வதில் பிழை ஏற்பட்டுள்ளது!</p></div>';
+    }
+}
