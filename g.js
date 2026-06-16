@@ -273,15 +273,15 @@ openFormBtn.addEventListener('click', () => { registerModal.style.display = 'fle
 closeRegBtn.addEventListener('click', () => { registerModal.style.display = 'none'; });
 closeRevBtn.addEventListener('click', () => { reviewModal.style.display = 'none'; });
 
-// FORM SUBMIT ACTION - GOOGLE SHEET-KU DATA ANUPPUTHAL
+// FORM SUBMIT ACTION - UPDATED TO FIX CARD NOT SHOWING ISSUE
 expertForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const fileInput = document.getElementById('profile-pic');
     const file = fileInput.files[0];
     
     const saveExpert = async (imageSrc = null) => {
-        const newExpert = {
-            action: "create",
+        // 1. Puthu expert data-va ready pannurom
+        const newExpertData = {
             id: Date.now().toString(),
             name: document.getElementById('name').value,
             phone: document.getElementById('phone').value,
@@ -289,35 +289,51 @@ expertForm.addEventListener('submit', (e) => {
             location: document.getElementById('location').value,
             rating: "5.0",
             image: imageSrc,
-            isPremium: false
+            isPremium: false,
+            reviews: []
         };
 
-        // UI-la temporary-aa update panna
-        experts.unshift({ ...newExpert, reviews: [] });
-        handleSearch();
+        // 2. IMMEDIATE UI UPDATE: Sheet-ku porathuku munnadiye UI-la card-ah kaatiduvom
+        experts.unshift(newExpertData);
+        handleSearch(); // Ippo card udane screen-la vandhudum!
+        
+        // Modal-ah close panni form-ah clear pannuvom
         registerModal.style.display = 'none';
         expertForm.reset();
 
-        // Google Sheet-la permanent-aa save panna background-la send aagum
+        // 3. BACKGROUND SYNC: UI distrub பண்ணாம background-la sheet-ku anuppuvom
+        const sheetPayload = {
+            action: "create",
+            ...newExpertData
+        };
+        delete sheetPayload.reviews; // Reviews-ah empty list-ah script paathukum
+
         try {
-            await fetch(SCRIPT_URL, {
+            const response = await fetch(SCRIPT_URL, {
                 method: 'POST',
-                body: JSON.stringify(newExpert)
+                mode: 'no-cors', // CORS issue varaama irukka 'no-cors' add pannirukken
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(sheetPayload)
             });
-            console.log("Sheet synced successfully!");
+            console.log("Data background-la Google Sheet-la permanent-ah save aayidichu!");
         } catch (error) {
-            console.error("Error saving to sheet:", error);
+            console.error("Sheet-la save aagala, aana card temporary-ah UI-la irukum:", error);
         }
     };
 
+    // Image check logic
     if (file) {
         const reader = new FileReader();
-        reader.onload = function(event) { saveExpert(event.target.result); };
+        reader.onload = function(event) { 
+            saveExpert(event.target.result); 
+        };
         reader.readAsDataURL(file);
     } else {
         saveExpert(null);
     }
 });
 
-// IPPO DIRECT-AA LIVE CODES SHEET LA IRUNTHU DATA LOGIC LOAD AGUM
+// Direct-aa live data-va Sheet-la irunthu edukka intha function-ah call pannurom
 loadExpertsFromSheet();
