@@ -1,3 +1,6 @@
+// TOP-LA INTHA LINE-A ADD PANNUNGA (Unga Web App URL-a inga podunga)
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxioRO9KxmmhNcxxTGhBdJj1_Jgut5YHmKqOUMWw_FC2Og10jkN3cLRncYiqhCiibe1/exec';
+
 const expertGrid = document.getElementById('experts-grid');
 const openFormBtn = document.getElementById('open-form-btn');
 const registerModal = document.getElementById('register-modal');
@@ -24,6 +27,19 @@ const chips = document.querySelectorAll('.chip');
 let experts = [];
 let activeExpertId = null; 
 let isOwnerLoggedIn = false; 
+
+// GOOGLE SHEET-LA IRUNTHU DATA-VA FETCH PANNUM FUNCTION
+async function loadExpertsFromSheet() {
+    expertGrid.innerHTML = '<div style="text-align:center; padding:40px; grid-column: 1/-1;"><p>விபரங்கள் லோடு ஆகிறது...</p></div>';
+    try {
+        const response = await fetch(SCRIPT_URL);
+        experts = await response.json();
+        handleSearch();
+    } catch (error) {
+        console.error("Error fetching data:", error);
+        expertGrid.innerHTML = '<div style="text-align:center; padding:40px; grid-column: 1/-1; color:red;"><p>டேட்டா லோடு செய்வதில் பிழை ஏற்பட்டுள்ளது!</p></div>';
+    }
+}
 
 // PREMIUM RANKING ENGINE (Premium First -> Then Rating Sorting High to Low)
 function sortExpertsData(array) {
@@ -54,6 +70,7 @@ function renderExperts(dataToRender = experts) {
         const card = document.createElement('div');
         card.classList.add('expert-card');
         
+        // Google Sheet-la TRUE-nu iruntha automatic-aa premium layout apply aagum
         if (expert.isPremium) {
             card.classList.add('premium-active');
         }
@@ -137,7 +154,7 @@ window.togglePremiumStatus = function(id) {
 // OWNER LOGIN (Password: admin123)
 ownerLoginBtn.addEventListener('click', () => {
     const password = prompt("பாஸ்வேர்ட் அடிக்கவும்:");
-    if (password === "js1602") {
+    if (password === "admin123") {
         isOwnerLoggedIn = true;
         adminStatusBar.style.display = 'flex';
         ownerLoginBtn.style.display = 'none';
@@ -256,13 +273,15 @@ openFormBtn.addEventListener('click', () => { registerModal.style.display = 'fle
 closeRegBtn.addEventListener('click', () => { registerModal.style.display = 'none'; });
 closeRevBtn.addEventListener('click', () => { reviewModal.style.display = 'none'; });
 
+// FORM SUBMIT ACTION - GOOGLE SHEET-KU DATA ANUPPUTHAL
 expertForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const fileInput = document.getElementById('profile-pic');
     const file = fileInput.files[0];
     
-    const saveExpert = (imageSrc = null) => {
+    const saveExpert = async (imageSrc = null) => {
         const newExpert = {
+            action: "create",
             id: Date.now().toString(),
             name: document.getElementById('name').value,
             phone: document.getElementById('phone').value,
@@ -270,13 +289,25 @@ expertForm.addEventListener('submit', (e) => {
             location: document.getElementById('location').value,
             rating: "5.0",
             image: imageSrc,
-            isPremium: false,
-            reviews: []
+            isPremium: false
         };
-        experts.unshift(newExpert);
+
+        // UI-la temporary-aa update panna
+        experts.unshift({ ...newExpert, reviews: [] });
         handleSearch();
         registerModal.style.display = 'none';
         expertForm.reset();
+
+        // Google Sheet-la permanent-aa save panna background-la send aagum
+        try {
+            await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify(newExpert)
+            });
+            console.log("Sheet synced successfully!");
+        } catch (error) {
+            console.error("Error saving to sheet:", error);
+        }
     };
 
     if (file) {
@@ -288,6 +319,5 @@ expertForm.addEventListener('submit', (e) => {
     }
 });
 
-handleSearch();
-
-
+// IPPO DIRECT-AA LIVE CODES SHEET LA IRUNTHU DATA LOGIC LOAD AGUM
+loadExpertsFromSheet();
