@@ -14,11 +14,6 @@ const reviewForm = document.getElementById('review-form');
 const modalReviewsList = document.getElementById('modal-reviews-list');
 const modalReviewCount = document.getElementById('modal-review-count');
 
-// Owner Authentication Elements
-const ownerLoginBtn = document.getElementById('owner-login-btn');
-const ownerLogoutBtn = document.getElementById('owner-logout-btn');
-const adminStatusBar = document.getElementById('admin-status-bar');
-
 const searchBtn = document.getElementById('search-btn');
 const areaSearch = document.getElementById('area-search');
 const serviceFilter = document.getElementById('service-filter');
@@ -26,15 +21,20 @@ const chips = document.querySelectorAll('.chip');
 
 let experts = [];
 let activeExpertId = null; 
-let isOwnerLoggedIn = false; 
 
-// GOOGLE SHEET-LA IRUNTHU DATA-VA FETCH PANNUM FUNCTION
+// GOOGLE SHEET-LA IRUNTHU DATA-VA FETCH PANNUM FUNCTION (சுத்தப்படுத்தப்பட்ட ஒரே ஒரு ஃபங்ஷன்)
 async function loadExpertsFromSheet() {
     expertGrid.innerHTML = '<div style="text-align:center; padding:40px; grid-column: 1/-1;"><p>விபரங்கள் லோடு ஆகிறது...</p></div>';
     try {
-        const response = await fetch(SCRIPT_URL);
+        const response = await fetch(SCRIPT_URL, { method: "GET", redirect: "follow" });
         experts = await response.json();
-        handleSearch();
+        
+        if (experts.error) {
+            console.error("Apps Script Error:", experts.error);
+            expertGrid.innerHTML = '<div style="text-align:center; padding:40px; grid-column: 1/-1; color:red;"><p>Apps Script-la error ullathu!</p></div>';
+        } else {
+            handleSearch();
+        }
     } catch (error) {
         console.error("Error fetching data:", error);
         expertGrid.innerHTML = '<div style="text-align:center; padding:40px; grid-column: 1/-1; color:red;"><p>டேட்டா லோடு செய்வதில் பிழை ஏற்பட்டுள்ளது!</p></div>';
@@ -70,17 +70,10 @@ function renderExperts(dataToRender = experts) {
         const card = document.createElement('div');
         card.classList.add('expert-card');
         
-        // Google Sheet-la TRUE-nu iruntha automatic-aa premium layout apply aagum
         if (expert.isPremium) {
             card.classList.add('premium-active');
         }
         
-        const isBadRating = parseFloat(expert.rating) <= 3.0;
-        if (isOwnerLoggedIn && isBadRating && !expert.isPremium) {
-            card.classList.add('bad-review-alert');
-        }
-        
-        // Icon rendering based on Category type
         let avatarHTML = '';
         if (expert.image) {
             avatarHTML = `<img src="${expert.image}" alt="${expert.name}" class="avatar-image">`;
@@ -94,21 +87,6 @@ function renderExperts(dataToRender = experts) {
         let tagHTML = '';
         if (expert.isPremium) {
             tagHTML = `<span class="premium-tag"><i class="fa-solid fa-crown"></i> Premium</span>`;
-        } else if (isOwnerLoggedIn && isBadRating) {
-            tagHTML = `<span class="bad-review-tag"><i class="fa-solid fa-triangle-exclamation"></i> Bad Review</span>`;
-        }
-        
-        let ownerActionsHTML = '';
-        if (isOwnerLoggedIn) {
-            const premBtnText = expert.isPremium ? 'Remove Premium' : 'Make Premium';
-            const premClass = expert.isPremium ? 'premium-toggle-btn is-prem' : 'premium-toggle-btn';
-            
-            ownerActionsHTML = `
-                <button class="${premClass}" onclick="togglePremiumStatus('${expert.id}')">${premBtnText}</button>
-                <button class="delete-btn" onclick="deleteExpertProfile('${expert.id}')">
-                    <i class="fa-solid fa-trash-can"></i>
-                </button>
-            `;
         }
         
         card.innerHTML = `
@@ -127,7 +105,6 @@ function renderExperts(dataToRender = experts) {
                     <a href="tel:${expert.phone}" class="call-btn-link">
                         <i class="fa-solid fa-phone"></i>
                     </a>
-                    ${ownerActionsHTML}
                 </div>
             </div>
         `;
@@ -140,45 +117,6 @@ function getProfTamil(prof) {
     if(prof === 'food') return 'உணவகம் & மெஸ்';
     if(prof === 'health') return 'கிளினிக் / ஹாஸ்பிட்டல்';
     return prof;
-}
-
-// OWNER PREMIUM SWITCH TOGGLE
-window.togglePremiumStatus = function(id) {
-    const expert = experts.find(e => e.id === id);
-    if (expert) {
-        expert.isPremium = !expert.isPremium;
-        handleSearch();
-    }
-}
-
-// OWNER LOGIN (Password: admin123)
-ownerLoginBtn.addEventListener('click', () => {
-    const password = prompt("பாஸ்வேர்ட் அடிக்கவும்:");
-    if (password === "admin123") {
-        isOwnerLoggedIn = true;
-        adminStatusBar.style.display = 'flex';
-        ownerLoginBtn.style.display = 'none';
-        handleSearch();
-        alert("Owner Mode Active! பிரீமியம் கார்டுகளை செட் செய்யலாம்.");
-    } else {
-        alert("தவறான பாஸ்வேர்ட்!");
-    }
-});
-
-// OWNER LOGOUT
-ownerLogoutBtn.addEventListener('click', () => {
-    isOwnerLoggedIn = false;
-    adminStatusBar.style.display = 'none';
-    ownerLoginBtn.style.display = 'flex';
-    handleSearch();
-});
-
-// ADMIN PROFILE DELETER
-window.deleteExpertProfile = function(id) {
-    if (confirm("நிச்சயமாக இதை நீக்க வேண்டுமா?")) {
-        experts = experts.filter(e => e.id !== id);
-        handleSearch();
-    }
 }
 
 // Open Review Modal System
@@ -269,18 +207,18 @@ chips.forEach(chip => {
 searchBtn.addEventListener('click', handleSearch);
 areaSearch.addEventListener('keyup', (e) => { if(e.key === 'Enter') handleSearch(); });
 
+// MODAL OPEN / CLOSE EVENTS (இப்போது கச்சிதமாக வேலை செய்யும்)
 openFormBtn.addEventListener('click', () => { registerModal.style.display = 'flex'; });
 closeRegBtn.addEventListener('click', () => { registerModal.style.display = 'none'; });
 closeRevBtn.addEventListener('click', () => { reviewModal.style.display = 'none'; });
 
-// FORM SUBMIT ACTION - UPDATED TO FIX CARD NOT SHOWING ISSUE
+// FORM SUBMIT ACTION
 expertForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const fileInput = document.getElementById('profile-pic');
     const file = fileInput.files[0];
     
     const saveExpert = async (imageSrc = null) => {
-        // 1. Puthu expert data-va ready pannurom
         const newExpertData = {
             id: Date.now().toString(),
             name: document.getElementById('name').value,
@@ -293,37 +231,33 @@ expertForm.addEventListener('submit', (e) => {
             reviews: []
         };
 
-        // 2. IMMEDIATE UI UPDATE: Sheet-ku porathuku munnadiye UI-la card-ah kaatiduvom
         experts.unshift(newExpertData);
-        handleSearch(); // Ippo card udane screen-la vandhudum!
+        handleSearch(); 
         
-        // Modal-ah close panni form-ah clear pannuvom
         registerModal.style.display = 'none';
         expertForm.reset();
 
-        // 3. BACKGROUND SYNC: UI distrub பண்ணாம background-la sheet-ku anuppuvom
         const sheetPayload = {
             action: "create",
             ...newExpertData
         };
-        delete sheetPayload.reviews; // Reviews-ah empty list-ah script paathukum
+        delete sheetPayload.reviews; 
 
         try {
-            const response = await fetch(SCRIPT_URL, {
+            await fetch(SCRIPT_URL, {
                 method: 'POST',
-                mode: 'no-cors', // CORS issue varaama irukka 'no-cors' add pannirukken
+                mode: 'no-cors', 
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(sheetPayload)
             });
-            console.log("Data background-la Google Sheet-la permanent-ah save aayidichu!");
+            console.log("Data saved to Google Sheet!");
         } catch (error) {
-            console.error("Sheet-la save aagala, aana card temporary-ah UI-la irukum:", error);
+            console.error("Sheet save error:", error);
         }
     };
 
-    // Image check logic
     if (file) {
         const reader = new FileReader();
         reader.onload = function(event) { 
@@ -335,24 +269,5 @@ expertForm.addEventListener('submit', (e) => {
     }
 });
 
-// Direct-aa live data-va Sheet-la irunthu edukka intha function-ah call pannurom
+// App Initialization
 loadExpertsFromSheet();
-
-async function loadExpertsFromSheet() {
-    expertGrid.innerHTML = '<div style="text-align:center; padding:40px; grid-column: 1/-1;"><p>விபரங்கள் லோடு ஆகிறது...</p></div>';
-    try {
-        // Redirects-ah handle panna {redirect: "follow"} add pannirukken
-        const response = await fetch(SCRIPT_URL, { method: "GET", redirect: "follow" });
-        experts = await response.json();
-        
-        if (experts.error) {
-            console.error("Apps Script Error:", experts.error);
-            expertGrid.innerHTML = '<div style="text-align:center; padding:40px; grid-column: 1/-1; color:red;"><p>Apps Script-la error ullathu!</p></div>';
-        } else {
-            handleSearch();
-        }
-    } catch (error) {
-        console.error("Error fetching data:", error);
-        expertGrid.innerHTML = '<div style="text-align:center; padding:40px; grid-column: 1/-1; color:red;"><p>டேطاء லோடு செய்வதில் பிழை ஏற்பட்டுள்ளது!</p></div>';
-    }
-}
