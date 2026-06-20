@@ -1,4 +1,3 @@
-// TOP-LA INTHA LINE-A ADD PANNUNGA (Unga Web App URL-a inga podunga)
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwMmTweux2sZChYAGtTglWXtcgs4EQEXTuQfz9vlZVkTjY0vVFG8TS-503rBcAIcCbG/exec';
 
 const expertGrid = document.getElementById('experts-grid');
@@ -22,47 +21,29 @@ const chips = document.querySelectorAll('.chip');
 let experts = [];
 let activeExpertId = null; 
 
-// GOOGLE SHEET-LA IRUNTHU DATA-VA FETCH PANNUM FUNCTION (சுத்தப்படுத்தப்பட்ட ஒரே ஒரு ஃபங்ஷன்)
 async function loadExpertsFromSheet() {
-    expertGrid.innerHTML = '<div style="text-align:center; padding:40px; grid-column: 1/-1;"><p>விபரங்கள் லோடு ஆகிறது...</p></div>';
+    expertGrid.innerHTML = '<div style="text-align:center; padding:40px; color:#D4AF37;"><p>அத்தியாவசிய விபரங்கள் லோடு ஆகிறது...</p></div>';
     try {
         const response = await fetch(SCRIPT_URL, { method: "GET", redirect: "follow" });
         experts = await response.json();
-        
         if (experts.error) {
-            console.error("Apps Script Error:", experts.error);
-            expertGrid.innerHTML = '<div style="text-align:center; padding:40px; grid-column: 1/-1; color:red;"><p>Apps Script-la error ullathu!</p></div>';
+            console.error(experts.error);
+            expertGrid.innerHTML = '<div style="text-align:center; padding:40px; color:red;"><p>Apps Script Error!</p></div>';
         } else {
             handleSearch();
         }
     } catch (error) {
-        console.error("Error fetching data:", error);
-        expertGrid.innerHTML = '<div style="text-align:center; padding:40px; grid-column: 1/-1; color:red;"><p>டேட்டா லோடு செய்வதில் பிழை ஏற்பட்டுள்ளது!</p></div>';
+        expertGrid.innerHTML = '<div style="text-align:center; padding:40px; color:red;"><p>டேட்டா பிழை!</p></div>';
     }
 }
 
-// PREMIUM RANKING ENGINE (Premium First -> Then Rating Sorting High to Low)
-function sortExpertsData(array) {
-    return array.sort((a, b) => {
-        if (a.isPremium && !b.isPremium) return -1;
-        if (!a.isPremium && b.isPremium) return 1;
-        return parseFloat(b.rating) - parseFloat(a.rating);
-    });
-}
-
-// Function to render profiles
 function renderExperts(dataToRender = experts) {
     expertGrid.innerHTML = '';
-    
-    const sortedData = sortExpertsData([...dataToRender]);
+    const sortedData = [...dataToRender].sort((a, b) => parseFloat(b.rating) - parseFloat(a.rating));
     resultsCount.textContent = `${sortedData.length} பதிவுகள் உள்ளன`;
 
     if(sortedData.length === 0) {
-        expertGrid.innerHTML = `
-            <div style="text-align:center; padding:40px; color:#64748B; grid-column: 1/-1;">
-                <i class="fa-solid fa-store-slash" style="font-size:40px; margin-bottom:10px; color:#cbd5e1;"></i>
-                <p>இந்த ஏரியாவில் விபரங்கள் எதுவும் இல்லை! முதல் ஆளாகப் பதிவு செய்யுங்கள்.</p>
-            </div>`;
+        expertGrid.innerHTML = '<div style="text-align:center; padding:40px; color:#5C677D;">பதிவுகள் எதுவும் இல்லை!</div>';
         return;
     }
 
@@ -70,42 +51,28 @@ function renderExperts(dataToRender = experts) {
         const card = document.createElement('div');
         card.classList.add('expert-card');
         
-        if (expert.isPremium) {
-            card.classList.add('premium-active');
-        }
-        
-        let avatarHTML = '';
-        if (expert.image) {
-            avatarHTML = `<img src="${expert.image}" alt="${expert.name}" class="avatar-image">`;
-        } else {
-            let iconClass = 'fa-bed';
-            if (expert.prof === 'food') iconClass = 'fa-utensils';
-            if (expert.prof === 'health') iconClass = 'fa-heart-pulse';
-            avatarHTML = `<div class="avatar-container"><i class="fa-solid ${iconClass}"></i></div>`;
-        }
-        
-        let tagHTML = '';
-        if (expert.isPremium) {
-            tagHTML = `<span class="premium-tag"><i class="fa-solid fa-crown"></i> Premium</span>`;
-        }
-        
+        // Custom Icons for Life Essentials
+        let iconClass = 'fa-hotel'; 
+        if (expert.prof === 'mess') iconClass = 'fa-utensils';
+        if (expert.prof === 'clinic') iconClass = 'fa-heart-pulse';
+
+        const waMessage = encodeURIComponent(`வணக்கம், Local Workers தளம் மூலம் தொடர்பு கொள்கிறேன். உங்களது சேவை/ரூம் விபரங்கள் தேவைப்படுகிறது.`);
+
         card.innerHTML = `
-            ${tagHTML}
             <div class="card-left" onclick="openReviewSystem('${expert.id}')">
-                ${avatarHTML}
+                <div class="avatar-container"><i class="fa-solid ${iconClass}"></i></div>
                 <div class="expert-info">
-                    <span class="badge">${getProfTamil(expert.prof)}</span>
+                    <span class="badge" style="${expert.prof === 'clinic' ? 'background:#FEE2E2; color:#DC2626; border-color:#FCA5A5;' : ''}">
+                        ${getProfTamil(expert.prof)}
+                    </span>
                     <h4>${expert.name}</h4>
                     <p class="expert-loc"><i class="fa-solid fa-location-dot"></i> ${expert.location}</p>
-                    <div class="rating-badge"><i class="fa-solid fa-star"></i> <span>${expert.rating}</span></div>
+                    <div class="rating-badge"><i class="fa-solid fa-star"></i> <span>${expert.rating || '5.0'}</span></div>
                 </div>
             </div>
             <div class="card-right-actions">
-                <div class="action-buttons-row">
-                    <a href="tel:${expert.phone}" class="call-btn-link">
-                        <i class="fa-solid fa-phone"></i>
-                    </a>
-                </div>
+                <a href="tel:${expert.phone}" class="call-btn-link"><i class="fa-solid fa-phone"></i></a>
+                <a href="https://wa.me/91${expert.phone}?text=${waMessage}" target="_blank" class="wa-btn-link"><i class="fa-brands fa-whatsapp"></i></a>
             </div>
         `;
         expertGrid.appendChild(card);
@@ -113,13 +80,12 @@ function renderExperts(dataToRender = experts) {
 }
 
 function getProfTamil(prof) {
-    if(prof === 'pg') return 'Rooms & PG';
-    if(prof === 'food') return 'உணவகம் & மெஸ்';
-    if(prof === 'health') return 'கிளினிக் / ஹாஸ்பிட்டல்';
+    if(prof === 'pg_room') return 'PG / ரூம்கள்';
+    if(prof === 'mess') return 'ஹோம்லி மெஸ்';
+    if(prof === 'clinic') return 'அவசர கிளினிக்';
     return prof;
 }
 
-// Open Review Modal System
 window.openReviewSystem = function(id) {
     const expert = experts.find(e => e.id === id);
     if (!expert) return;
@@ -129,15 +95,11 @@ window.openReviewSystem = function(id) {
     document.getElementById('modal-expert-prof').textContent = getProfTamil(expert.prof);
     document.getElementById('modal-expert-loc').innerHTML = `<i class="fa-solid fa-location-dot"></i> ${expert.location}`;
     
-    const avatarDiv = document.getElementById('modal-expert-avatar');
-    if (expert.image) {
-        avatarDiv.innerHTML = `<img src="${expert.image}" class="avatar-image">`;
-    } else {
-        let iconClass = 'fa-bed';
-        if (expert.prof === 'food') iconClass = 'fa-utensils';
-        if (expert.prof === 'health') iconClass = 'fa-heart-pulse';
-        avatarDiv.innerHTML = `<div class="avatar-container" style="margin-bottom:0;"><i class="fa-solid ${iconClass}"></i></div>`;
-    }
+    let iconClass = 'fa-hotel';
+    if (expert.prof === 'mess') iconClass = 'fa-utensils';
+    if (expert.prof === 'clinic') iconClass = 'fa-heart-pulse';
+    
+    document.getElementById('modal-expert-avatar').innerHTML = `<div class="avatar-container"><i class="fa-solid ${iconClass}"></i></div>`;
 
     renderReviewsList(expert);
     reviewModal.style.display = 'flex';
@@ -145,21 +107,18 @@ window.openReviewSystem = function(id) {
 
 function renderReviewsList(expert) {
     modalReviewsList.innerHTML = '';
-    modalReviewCount.textContent = expert.reviews.length;
+    const reviewsArr = expert.reviews || [];
+    modalReviewCount.textContent = reviewsArr.length;
 
-    if (expert.reviews.length === 0) {
-        modalReviewsList.innerHTML = `<p style="font-size:12px; color:#64748B; text-align:center; padding:10px;">மதிப்புரைகள் எதுவும் இல்லை.</p>`;
+    if (reviewsArr.length === 0) {
+        modalReviewsList.innerHTML = `<p style="font-size:12px; color:#5C677D; text-align:center;">மதிப்புரைகள் இல்லை.</p>`;
         return;
     }
 
-    expert.reviews.forEach(rev => {
+    reviewsArr.forEach(rev => {
         const revCard = document.createElement('div');
         revCard.classList.add('single-review-card');
-        let stars = '⭐'.repeat(rev.stars);
-        revCard.innerHTML = `
-            <div class="review-stars">${stars}</div>
-            <p class="review-comment">${rev.text}</p>
-        `;
+        revCard.innerHTML = `<div class="review-stars">${'⭐'.repeat(rev.stars)}</div><p>${rev.text}</p>`;
         modalReviewsList.appendChild(revCard);
     });
 }
@@ -171,26 +130,24 @@ reviewForm.addEventListener('submit', (e) => {
 
     const expert = experts.find(e => e.id === activeExpertId);
     if (expert) {
+        if (!expert.reviews) expert.reviews = [];
         expert.reviews.unshift({ stars: parseInt(ratingSelect), text: reviewText });
-        const totalStars = expert.reviews.reduce((sum, r) => sum + r.stars, 0);
-        expert.rating = (totalStars / expert.reviews.length).toFixed(1);
+        expert.rating = (expert.reviews.reduce((sum, r) => sum + r.stars, 0) / expert.reviews.length).toFixed(1);
         renderReviewsList(expert);
         handleSearch();
         reviewForm.reset();
     }
 });
 
-// SEARCH FILTER WITH LIVE SORTING
 function handleSearch() {
     const searchText = areaSearch.value.toLowerCase().trim();
     const selectedService = serviceFilter.value;
 
     const filtered = experts.filter(expert => {
-        const matchesLocation = expert.location.toLowerCase().includes(searchText);
+        const matchesLocation = expert.location ? expert.location.toLowerCase().includes(searchText) : false;
         const matchesService = (selectedService === 'all') || (expert.prof === selectedService);
         return matchesLocation && matchesService;
     });
-
     renderExperts(filtered);
 }
 
@@ -198,76 +155,58 @@ chips.forEach(chip => {
     chip.addEventListener('click', () => {
         chips.forEach(c => c.classList.remove('active'));
         chip.classList.add('active');
-        const filterValue = chip.getAttribute('data-filter');
-        serviceFilter.value = filterValue;
+        serviceFilter.value = chip.getAttribute('data-filter');
         handleSearch();
     });
 });
 
 searchBtn.addEventListener('click', handleSearch);
 areaSearch.addEventListener('keyup', (e) => { if(e.key === 'Enter') handleSearch(); });
-
-// MODAL OPEN / CLOSE EVENTS (இப்போது கச்சிதமாக வேலை செய்யும்)
 openFormBtn.addEventListener('click', () => { registerModal.style.display = 'flex'; });
 closeRegBtn.addEventListener('click', () => { registerModal.style.display = 'none'; });
 closeRevBtn.addEventListener('click', () => { reviewModal.style.display = 'none'; });
 
-// FORM SUBMIT ACTION
-expertForm.addEventListener('submit', (e) => {
+expertForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const fileInput = document.getElementById('profile-pic');
-    const file = fileInput.files[0];
-    
-    const saveExpert = async (imageSrc = null) => {
-        const newExpertData = {
-            id: Date.now().toString(),
-            name: document.getElementById('name').value,
-            phone: document.getElementById('phone').value,
-            prof: document.getElementById('prof').value,
-            location: document.getElementById('location').value,
-            rating: "5.0",
-            image: imageSrc,
-            isPremium: false,
-            reviews: []
-        };
-
-        experts.unshift(newExpertData);
-        handleSearch(); 
-        
-        registerModal.style.display = 'none';
-        expertForm.reset();
-
-        const sheetPayload = {
-            action: "create",
-            ...newExpertData
-        };
-        delete sheetPayload.reviews; 
-
-        try {
-            await fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors', 
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(sheetPayload)
-            });
-            console.log("Data saved to Google Sheet!");
-        } catch (error) {
-            console.error("Sheet save error:", error);
-        }
+    const newEntry = {
+        id: Date.now().toString(),
+        name: document.getElementById('name').value,
+        phone: document.getElementById('phone').value,
+        prof: document.getElementById('prof').value,
+        location: document.getElementById('location').value,
+        rating: "5.0",
+        reviews: []
     };
 
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(event) { 
-            saveExpert(event.target.result); 
-        };
-        reader.readAsDataURL(file);
-    } else {
-        saveExpert(null);
-    }
+    experts.unshift(newEntry);
+    handleSearch();
+    registerModal.style.display = 'none';
+    expertForm.reset();
+
+    try {
+        await fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: "create", ...newEntry })
+        });
+    } catch (error) { console.error(error); }
 });
 
-// App Initialization
 loadExpertsFromSheet();
+
+// Support System
+const tipsBtn = document.getElementById('tips-btn');
+const tipsModal = document.getElementById('tips-modal');
+const closeTipsBtn = document.getElementById('close-tips-btn');
+const tipsForm = document.getElementById('tips-form');
+
+tipsBtn.addEventListener('click', () => { tipsModal.style.display = 'flex'; });
+closeTipsBtn.addEventListener('click', () => { tipsModal.style.display = 'none'; });
+tipsForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const amount = document.getElementById('tips-amount').value;
+    window.location.href = `upi://pay?pa=8939717405@ybl&pn=LocalWorkers&am=${amount}&cu=INR&tn=Support`;
+    tipsModal.style.display = 'none';
+});
+
