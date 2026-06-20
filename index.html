@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Namma Ooru - PG, Food & Health Finder</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Local Workers - Premium Essentials Network</title>
+    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="g.css">
 </head>
@@ -13,101 +13,109 @@
     <header>
         <div class="logo-container">
             <i class="fa-solid fa-city city-icon"></i>
-            <h1>NammaOoru<span class="dot">.</span></h1>
+            <h1>NAMMA OORU<span class="dot"></span></h1>
         </div>
+        <button id="tips-btn" class="tips-header-btn">
+            <i class="fa-solid fa-piggy-bank"></i> TIPS
+        </button>
     </header>
 
     <main>
-    
-
+        <!-- Royal Hero Section -->
         <section class="hero-section">
-            <h2>தங்குமிடம், உணவு மற்றும் ஆரோக்கியம்<br><span>ஒரே இடத்தில்!</span></h2>
-            <p>உங்களுக்கு அருகிலுள்ள சிறந்த PG/ரூம்கள், ஹோம்லி மெஸ் மற்றும் அவசர கிளினிக்குகள்.</p>
+            <h2>தங்குமிடம், வீட்டுச் சாப்பாடு மற்றும் அவசர மருத்துவம்<br><span>Elite Care Network!</span></h2>
+            <p>உங்களுக்கு அருகிலுள்ள சிறந்த PG/ரூம்கள், ஹோம்லி மெஸ் மற்றும் அவசர கிளினிக்குகள் ஒரே இடத்தில்.</p>
             
             <div class="search-box-container">
                 <div class="input-wrapper">
                     <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                    <input type="text" id="area-search" placeholder="பகுதி அல்லது பின்கோடு அடிக்கவும்...">
+                    <input type="text" id="area-search" placeholder="உங்கள் ஏரியா அல்லது பின்கோடு அடிக்கவும்...">
                 </div>
                 <div class="select-wrapper">
-                    <i class="fa-solid fa-layer-group brief-icon"></i>
+                    <i class="fa-solid fa-wand-magic-sparkles brief-icon"></i>
                     <select id="service-filter">
-                        <option value="all">அனைத்து தேவைகளும்</option>
-                        <option value="pg">Rooms & PG</option>
-                        <option value="food">உணவகம் & மெஸ் (Mess)</option>
-                        <option value="health">ஹாஸ்பிட்டல் & கிளினிக்</option>
+                        <option value="all">அனைத்து அத்தியாவசிய சேவைகளும்</option>
+                        <option value="pg_room">PG / வாடகை ரூம்கள்</option>
+                        <option value="mess">ஹோம்லி மெஸ் (Homely Mess)</option>
+                        <option value="clinic">அவசர கிளினிக் (24/7 Clinics)</option>
                     </select>
                 </div>
                 <button id="search-btn">தேடுங்கள்</button>
             </div>
         </section>
 
+        <!-- Registration Trigger -->
         <section class="register-trigger-section">
             <button id="open-form-btn" class="main-register-btn">
-                <i class="fa-solid fa-square-plus"></i> உங்கள் பிசினஸை இலவசமாக விளம்பரப்படுத்த (Register Here)
+                <i class="fa-solid fa-house-medical"></i> உங்கள் சேவை அல்லது கிளினிக்கை இலவசமாகப் பதியவும் (Register)
             </button>
         </section>
 
+        <!-- Category Chips -->
         <section class="quick-categories">
-            <h3>தேவைகள்</h3>
+            <h3>அத்தியாவசிய பிரிவுகள்</h3>
             <div class="category-chips">
-                <button class="chip active" data-filter="all">All</button>
-                <button class="chip" data-filter="pg"><i class="fa-solid fa-bed"></i> Rooms & PGs</button>
-                <button class="chip" data-filter="food"><i class="fa-solid fa-utensils"></i> Food & Mess</button>
-                <button class="chip" data-filter="health"><i class="fa-solid fa-heart-pulse"></i> Hospitals</button>
+                <button class="chip active" data-filter="all">All Services</button>
+                <button class="chip" data-filter="pg_room"><i class="fa-solid fa-hotel"></i> PG & Rooms</button>
+                <button class="chip" data-filter="mess"><i class="fa-solid fa-utensils"></i> Homely Mess</button>
+                <button class="chip" data-filter="clinic"><i class="fa-solid fa-heart-pulse"></i> Clinics</button>
             </div>
         </section>
 
+        <!-- Service Listings -->
         <section class="experts-section">
             <div class="section-title-area">
-                <h3>அருகில் உள்ள சேவைகள்</h3>
+                <h3>சரிபார்க்கப்பட்ட விபரங்கள்</h3>
                 <span id="results-count">0 பதிவுகள் உள்ளன</span>
             </div>
             <div class="experts-grid" id="experts-grid">
-                </div>
+                <!-- Data loads dynamically here -->
+            </div>
         </section>
     </main>
 
+    <!-- Registration Modal -->
     <div id="register-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3><i class="fa-solid fa-address-card"></i> புதிய பிசினஸ் பதிவு</h3>
+                <h3><i class="fa-solid fa-file-invoice"></i> புதிய சேவை / கிளினிக் பதிவு</h3>
                 <span class="close-btn" id="close-reg-btn">&times;</span>
             </div>
             <form id="expert-form">
                 <div class="form-group">
-                    <label><i class="fa-solid fa-shop"></i> பிசினஸ் / நிறுவனத்தின் பெயர்</label>
-                    <input type="text" id="name" placeholder="உதாரணம்: ரிலாக்ஸ் PG / அம்மா மெஸ் / காவேரி கிளினிக்" required>
+                    <label><i class="fa-solid fa-signature"></i> பெயர் / நிறுவனத்தின் பெயர்</label>
+                    <input type="text" id="name" placeholder="உண்மையான பெயர் அல்லது போர்டு பெயர்" required>
                 </div>
 
                 <div class="form-group">
-                    <label><i class="fa-solid fa-phone"></i> மொபைல் எண்</label>
+                    <label><i class="fa-solid fa-phone"></i> மொபைல் எண் (WhatsApp எண்)</label>
                     <input type="tel" id="phone" placeholder="98765xxxxx" required>
                 </div>
 
                 <div class="form-group">
-                    <label><i class="fa-solid fa-list"></i> வகை (Category)</label>
+                    <label><i class="fa-solid fa-list"></i> சேவை வகை (Category)</label>
                     <select id="prof" required>
-                        <option value="pg">Rooms & PG</option>
-                        <option value="food">உணவகம் / மெஸ் (Food & Mess)</option>
-                        <option value="health">ஹாஸ்பிட்டல் / கிளினிக் (Hospital & Clinic)</option>
+                        <option value="pg_room">PG / வாடகை ரூம்கள்</option>
+                        <option value="mess">ஹோம்லி மெஸ் (Homely Mess)</option>
+                        <option value="clinic">அவசர கிளினிக் (24/7 Clinic)</option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label><i class="fa-solid fa-map-pin"></i> ஏரியா / லொகேஷன்</label>
-                    <input type="text" id="location" placeholder="உதாரணம்: கோவை, காந்திபுரம்" required>
+                    <label><i class="fa-solid fa-map-location-dot"></i> ஏரியா / முழு லொகேஷன்</label>
+                    <input type="text" id="location" placeholder="உதாரணம்: சென்னை, வேளச்சேரி" required>
                 </div>
 
-                <button type="submit" class="submit-btn">விபரங்களைச் சேமிக்க</button>
+                <button type="submit" class="submit-btn">விபரங்களைச் சமர்ப்பிக்க</button>
             </form>
         </div>
     </div>
 
+    <!-- Details & Review Modal -->
     <div id="review-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3><i class="fa-solid fa-star"></i> விபரங்கள் & ரிவியூஸ்</h3>
+                <h3><i class="fa-solid fa-award"></i> விபரங்கள் & மதிப்பீடுகள்</h3>
                 <span class="close-btn" id="close-rev-btn">&times;</span>
             </div>
             
@@ -123,7 +131,7 @@
             <hr class="divider">
 
             <div class="add-review-section">
-                <h5>உங்கள் கருத்துக்களைக் கூறவும்:</h5>
+                <h5>உங்கள் மேலான கருத்துக்களைக் கூறவும்:</h5>
                 <form id="review-form">
                     <div class="rating-input-wrapper">
                         <label>ரேட்டிங்:</label>
@@ -136,7 +144,7 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <textarea id="review-text" rows="2" placeholder="உங்களது அனுபவத்தை எழுதவும்..." required></textarea>
+                        <textarea id="review-text" rows="2" placeholder="சுத்தம், தரம் மற்றும் கனிவான சேவை பற்றிய கருத்து..." required></textarea>
                     </div>
                     <button type="submit" class="submit-btn-sm">ரிவியூ சமர்ப்பிக்க</button>
                 </form>
@@ -144,13 +152,36 @@
 
             <hr class="divider">
 
-            <h5>வாடிக்கையாளர் கருத்துக்கள் (<span id="modal-review-count">0</span>):</h5>
-            <div class="reviews-display-list" id="modal-reviews-list">
+            <h5>பயனர்களின் கருத்துக்கள் (<span id="modal-review-count">0</span>):</h5>
+            <div class="reviews-display-list" id="modal-reviews-list"></div>
+        </div>
+    </div>
+
+    <!-- Support Modal -->
+    <div id="tips-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-gem" style="color: #D4AF37;"></i> Local Workers - ஆதரவு அளிக்கவும்</h3>
+                <span class="close-btn" id="close-tips-btn">&times;</span>
+            </div>
+            <div style="text-align: center; margin-bottom: 15px;">
+                <p style="font-size: 14px; color: #A4B3C6;">எங்கள் பிரீமியம் சேவை உங்களுக்குப் பிடித்திருந்தால், சிறு தொகையை வழங்கி எங்களை ஊக்குவிக்கலாம்!</p>
+            </div>
+            <form id="tips-form">
+                <div class="form-group">
+                    <label><i class="fa-solid fa-indian-rupee-sign"></i> தொகையை உள்ளிடவும்</label>
+                    <input type="number" id="tips-amount" placeholder="100" min="1" required>
                 </div>
+                <button type="submit" class="submit-btn" style="background: linear-gradient(135deg, #D4AF37 0%, #AA7C11 100%); color: #0F172A;">
+                    <i class="fa-solid city-icon"></i> Pay via UPI
+                </button>
+            </form>
         </div>
     </div>
 
     <script src="g.js"></script>
 </body>
 </html>
+
+
 
