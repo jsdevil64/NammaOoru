@@ -166,32 +166,58 @@ openFormBtn.addEventListener('click', () => { registerModal.style.display = 'fle
 closeRegBtn.addEventListener('click', () => { registerModal.style.display = 'none'; });
 closeRevBtn.addEventListener('click', () => { reviewModal.style.display = 'none'; });
 
+// படிவச் சமர்ப்பிப்பு (Form Submit) லாஜிக்
 expertForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const newEntry = {
+    
+    const submitBtn = expertForm.querySelector('.submit-btn');
+    submitBtn.textContent = 'பதிவாகிறது... வெயிட் பண்ணுங்க தலை...';
+    submitBtn.disabled = true;
+    
+    const newExpertData = {
         id: Date.now().toString(),
         name: document.getElementById('name').value,
         phone: document.getElementById('phone').value,
         prof: document.getElementById('prof').value,
         location: document.getElementById('location').value,
         rating: "5.0",
+        isPremium: false,
         reviews: []
     };
 
-    experts.unshift(newEntry);
-    handleSearch();
+    // லோக்கலாக உடனே கார்டை சேர்க்கிறது
+    experts.unshift(newExpertData);
+    handleSearch(); 
+    
+    // ரெஜிஸ்டர் ஃபார்ம் மோடலை மூடிவிட்டு, ஃபார்மை ரீசெட் செய்கிறது
     registerModal.style.display = 'none';
     expertForm.reset();
+
+    // போட்டோவில் உள்ளபடி கஸ்டம் பாப்-அப்பை உடனே திரையில் காட்டுகிறது
+    successModal.style.display = 'flex';
 
     try {
         await fetch(SCRIPT_URL, {
             method: 'POST',
-            mode: 'no-cors',
+            mode: 'no-cors', 
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: "create", ...newEntry })
+            body: JSON.stringify({ action: "create", ...newExpertData })
         });
-    } catch (error) { console.error(error); }
+        console.log("Saved to Royal Database!");
+    } catch (error) {
+        console.error("Sheet save error:", error);
+    } finally {
+        submitBtn.textContent = 'விபரங்களைச் சமர்ப்பிக்க';
+        submitBtn.disabled = false;
+    }
 });
+
+// 'சரி' பட்டன் கிளிக் செய்யும்போது பாப்-அப் உடனடியாக மறைந்துவிடும்
+if (successOkBtn) {
+    successOkBtn.addEventListener('click', () => {
+        successModal.style.display = 'none';
+    });
+}
 
 loadExpertsFromSheet();
 
