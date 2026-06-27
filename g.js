@@ -1,4 +1,5 @@
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwMmTweux2sZChYAGtTglWXtcgs4EQEXTuQfz9vlZVkTjY0vVFG8TS-503rBcAIcCbG/exec'';
+// URL-ன் இறுதியில் இருந்த இரட்டை ஒற்றை மேற்கோள் குறி திருத்தப்பட்டுள்ளது
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwMmTweux2sZChYAGtTglWXtcgs4EQEXTuQfz9vlZVkTjY0vVFG8TS-503rBcAIcCbG/exec';
 
 const expertGrid = document.getElementById('experts-grid');
 const openFormBtn = document.getElementById('open-form-btn');
@@ -13,6 +14,9 @@ const reviewForm = document.getElementById('review-form');
 const modalReviewsList = document.getElementById('modal-reviews-list');
 const modalReviewCount = document.getElementById('modal-review-count');
 
+const successModal = document.getElementById('success-modal');
+const successOkBtn = document.getElementById('success-ok-btn');
+
 const searchBtn = document.getElementById('search-btn');
 const areaSearch = document.getElementById('area-search');
 const serviceFilter = document.getElementById('service-filter');
@@ -21,19 +25,21 @@ const chips = document.querySelectorAll('.chip');
 let experts = [];
 let activeExpertId = null; 
 
+// கூகுள் ஷீட்டிலிருந்து விபரங்களை லோடு செய்யும் ஃபங்க்ஷன்
 async function loadExpertsFromSheet() {
-    expertGrid.innerHTML = '<div style="text-align:center; padding:40px; color:#D4AF37;"><p>அத்தியாவசிய விபரங்கள் லோடு ஆகிறது...</p></div>';
+    expertGrid.innerHTML = '<div style="text-align:center; padding:40px; grid-column:1/-1; color:#D4AF37;"><p>அத்தியாவசிய விபரங்கள் லோடு ஆகிறது...</p></div>';
     try {
         const response = await fetch(SCRIPT_URL, { method: "GET", redirect: "follow" });
         experts = await response.json();
         if (experts.error) {
             console.error(experts.error);
-            expertGrid.innerHTML = '<div style="text-align:center; padding:40px; color:red;"><p>Apps Script Error!</p></div>';
+            expertGrid.innerHTML = '<div style="text-align:center; padding:40px; grid-column:1/-1; color:red;"><p>Apps Script Error!</p></div>';
         } else {
             handleSearch();
         }
     } catch (error) {
-        expertGrid.innerHTML = '<div style="text-align:center; padding:40px; color:red;"><p>டேட்டா பிழை!</p></div>';
+        console.error("Error loading data:", error);
+        expertGrid.innerHTML = '<div style="text-align:center; padding:40px; grid-column:1/-1; color:red;"><p>டேட்டா பிழை! Google Sheet-ஐச் சரிபார்க்கவும்.</p></div>';
     }
 }
 
@@ -43,7 +49,7 @@ function renderExperts(dataToRender = experts) {
     resultsCount.textContent = `${sortedData.length} பதிவுகள் உள்ளன`;
 
     if(sortedData.length === 0) {
-        expertGrid.innerHTML = '<div style="text-align:center; padding:40px; color:#5C677D;">பதிவுகள் எதுவும் இல்லை!</div>';
+        expertGrid.innerHTML = '<div style="text-align:center; padding:40px; color:#5C677D; grid-column:1/-1;">பதிவுகள் எதுவும் இல்லை!</div>';
         return;
     }
 
@@ -51,7 +57,6 @@ function renderExperts(dataToRender = experts) {
         const card = document.createElement('div');
         card.classList.add('expert-card');
         
-        // Custom Icons for Life Essentials
         let iconClass = 'fa-hotel'; 
         if (expert.prof === 'mess') iconClass = 'fa-utensils';
         if (expert.prof === 'clinic') iconClass = 'fa-heart-pulse';
@@ -166,7 +171,7 @@ openFormBtn.addEventListener('click', () => { registerModal.style.display = 'fle
 closeRegBtn.addEventListener('click', () => { registerModal.style.display = 'none'; });
 closeRevBtn.addEventListener('click', () => { reviewModal.style.display = 'none'; });
 
-// படிவச் சமர்ப்பிப்பு (Form Submit) லாஜிக்
+// புதிய சேவைப் பதிவு சமர்ப்பிப்பு மற்றும் பாப்-அப் மேலாண்மை
 expertForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -203,7 +208,7 @@ expertForm.addEventListener('submit', async (e) => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: "create", ...newExpertData })
         });
-        console.log("Saved to Royal Database!");
+        console.log("Saved to Google Sheet Database!");
     } catch (error) {
         console.error("Sheet save error:", error);
     } finally {
@@ -219,20 +224,34 @@ if (successOkBtn) {
     });
 }
 
+// லோடு தொடக்கம்
 loadExpertsFromSheet();
 
-// Support System
+// Support System (TIPS)
 const tipsBtn = document.getElementById('tips-btn');
 const tipsModal = document.getElementById('tips-modal');
 const closeTipsBtn = document.getElementById('close-tips-btn');
 const tipsForm = document.getElementById('tips-form');
 
-tipsBtn.addEventListener('click', () => { tipsModal.style.display = 'flex'; });
-closeTipsBtn.addEventListener('click', () => { tipsModal.style.display = 'none'; });
-tipsForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const amount = document.getElementById('tips-amount').value;
-    window.location.href = `upi://pay?pa=8939717405@ybl&pn=LocalWorkers&am=${amount}&cu=INR&tn=Support`;
-    tipsModal.style.display = 'none';
-});
+if (tipsBtn) {
+    tipsBtn.addEventListener('click', () => { tipsModal.style.display = 'flex'; });
+}
+if (closeTipsBtn) {
+    closeTipsBtn.addEventListener('click', () => { tipsModal.style.display = 'none'; });
+}
+if (tipsForm) {
+    tipsForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const amount = document.getElementById('tips-amount').value;
+        window.location.href = `upi://pay?pa=8939717405@ybl&pn=LocalWorkers&am=${amount}&cu=INR&tn=Support`;
+        tipsModal.style.display = 'none';
+    });
+}
 
+// பாப்-அப்களுக்கு வெளியே க்ளிக் செய்தால் மூடும் லாஜிக்
+window.addEventListener('click', (e) => {
+    if (e.target === registerModal) registerModal.style.display = 'none';
+    if (e.target === reviewModal) reviewModal.style.display = 'none';
+    if (e.target === tipsModal) tipsModal.style.display = 'none';
+    if (e.target === successModal) successModal.style.display = 'none';
+});
