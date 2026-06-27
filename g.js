@@ -1,4 +1,4 @@
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwMmTweux2sZChYAGtTglWXtcgs4EQEXTuQfz9vlZVkTjY0vVFG8TS-503rBcAIcCbG/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwMmTweux2sZChYAGtTglWXtcgs4EQEXTuQfz9vlZVkTjY0vVFG8TS-503rBcAIcCbG/exec'';
 
 const expertGrid = document.getElementById('experts-grid');
 const openFormBtn = document.getElementById('open-form-btn');
